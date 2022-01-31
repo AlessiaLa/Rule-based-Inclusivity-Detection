@@ -1,9 +1,10 @@
 import logging
 from datetime import datetime
-from hate_tweet_map.tweets_searcher.SearchTweets import SearchTweets
-
-import time
+# some_file.py
 import sys
+import time
+sys.path.append('../../')
+from tweets_searcher import SearchTweets
 
 
 def main():
@@ -15,7 +16,7 @@ def main():
     log.info(datetime.fromtimestamp(start))
 
     log.info("LOADING CONFIGURATION")
-    twitter_search = SearchTweets(path_to_cnfg_file='../../script/search_tweets/search_tweets.config')
+    twitter_search = SearchTweets.SearchTweets(path_to_cnfg_file='../../script/search_tweets/search_tweets.config')
 
     log.info("SEARCH FOR TWEETS")
     n_tweets = twitter_search.search()

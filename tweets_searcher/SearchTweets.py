@@ -9,11 +9,9 @@ from datetime import datetime, timezone
 import requests
 import yaml
 from tqdm import tqdm
-import re
-
-from hate_tweet_map import util
-from hate_tweet_map.database import DataBase
-
+import sys
+sys.path.append('../../')
+import util
 
 class SearchTweets:
     """
@@ -431,16 +429,25 @@ class SearchTweets:
 
         :return: None
         """
+
         self.log.debug("SAVING TWEETS")
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = []
             results = []
+            final = []
             for tweet in self.response.get('data', []):
                 fut = executor.submit(util.pre_process_tweets_response, tweet, self.response['includes'])
                 fut.add_done_callback(self.__save_callback)
                 futures.append(fut)
                 results.append(tweet['text'])
-                pd.DataFrame(results).to_csv('../../input.csv', sep=',', encoding='utf-8-sig', index=True, header=['Tweet'])
+                print(results)
+            for t in results:
+                t_new = t.replace('\n', ' ')
+                t_new = t_new.replace('\t', ' ')
+                t_new = t_new.replace('\r', ' ')
+                final.append(t_new)
+
+                pd.DataFrame(final).to_csv('../../input.csv', sep=',', encoding='utf-8-sig', index=True, header=['Tweet'])
 
         for job in tqdm(as_completed(futures), total=len(futures), desc="INFO:SEARCH:SAVING", leave=False, position=1):
             pass
@@ -449,3 +456,4 @@ class SearchTweets:
     def __save_callback(self, fut: Future):
         # append the tweet process on a list
         self._all.append(fut.result())
+

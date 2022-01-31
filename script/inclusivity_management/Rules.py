@@ -2,8 +2,11 @@ import spacy
 import argparse
 import pandas as pd
 import yaml
-import script.inclusivity_management.utils as utils
-from script.search_tweets import search_tweets
+import utils
+import sys
+sys.path.append('../search_tweets')
+
+import search_tweets
 import logging
 
 """
@@ -361,18 +364,21 @@ def rules(sentences, ph, explain):
         inclusive = sum(scores)
         explanations = [x for x in explanations if x is not None]
 
-        sentence = sentence.replace(",", "")
-        sentence = sentence.replace("\"", "")
+        new_sentence = sentence.replace("\n", " ")
+        new_sentence = new_sentence.replace("\t", " ")
+        new_sentence = new_sentence.replace("\r", " ")
+        new_sentence = new_sentence.replace(",", "")
+        #new_sentence = new_sentence.replace(",", "")
 
         d.append(
             {
-                'Tweet': sentence.replace("\t", " "),
+                'Tweet': new_sentence,
                 'inclusive_rate': inclusive,
                 'explanation': explanations
             }
         )
 
-        logging.info(sentence)
+        logging.info(new_sentence)
         logging.info(phrase)
         logging.info(inclusive)
         logging.info(explanations)
@@ -433,7 +439,7 @@ if __name__ == "__main__":
         d = rules(sentences, ph, explain)
 
         inclusivity_score, user_label = utils.calculate_user_score('../../results.csv')
-        print("User '"+ str(userid) + "' is classified as: "+ str(user_label) + " with a score of: "+ str(inclusivity_score))
+        print("User '"+ str(userid) + "' is classified as: " + str(user_label) + " with a score of: "+ str(inclusivity_score))
 
 
     if path_csv is not None:
