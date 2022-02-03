@@ -23,11 +23,12 @@ The developing team is composed of:
 
 The project doesn't require particular system configurations, since it only uses libraries that do not require strong computational power.
 
-In this project repo there is a file containing all the needed dependencies for the application.
-To install the dependencies is sufficient to type in the terminal:
+In this project repo there is a file containing all the needed dependencies for the application and a batch file to create the virtual environment and installing all the dependencies automatically.
+To do this is sufficient to type in the IDE terminal:
 ```bash
-  pip install -r requirements.txt
+  config.bat
 ```
+and then type directly the commands to execute the application, at the end of the installation.
 The script works via command line: it's possible to write the associated parameters to the configuration that we want to run.
 The possible parameters are the following:
 - userid: This parameter should be a Twitter user id
@@ -55,5 +56,5 @@ If for example the purpose is to load an already given list of tweets in a CSV a
  - SWAP UniBa [https://github.com/swapUniba]
 ## Documentation
 
-[Paper avalaible at:](https://linktodocumentation)
+[A whole new (inclusive) world](https://linktodocumentation)
 
