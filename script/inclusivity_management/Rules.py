@@ -159,7 +159,7 @@ def femaleSub_malePart(tweet, explain):
         if tag == 'PROPN' or tag == 'NOUN' and det == 'nsubj':
             continue
         if tag == 'AUX' and det == 'aux':
-            if 'Person' in morph:
+            if 'Person' in morph and 'Number' in morph:
                 if morph['Person'] == '3' and morph['Number'] == 'Sing':
                     if idx + 1 < len(tweet):
                         if tweet[idx + 1][1] == 'VERB' and tweet[idx + 1][2] == 'ROOT':
@@ -363,6 +363,7 @@ def rules(sentences, ph, explain):
 
         inclusive = sum(scores)
         explanations = [x for x in explanations if x is not None]
+
 
         new_sentence = sentence.replace("\n", " ")
         new_sentence = new_sentence.replace("\t", " ")
