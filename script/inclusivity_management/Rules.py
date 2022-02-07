@@ -4,6 +4,7 @@ import pandas as pd
 import yaml
 import utils
 import sys
+
 sys.path.append('../search_tweets')
 
 import search_tweets
@@ -22,7 +23,10 @@ also lexicons of proper nouns are used.
                             ex. "La Boschi"
 - femaleName_maleAppos():   This rule checks if a female proper noun is followed by a male apposition. 
                             If this happens, a score of 0.25 is taken off from the whole inclusivity.
+                            
+nome_predicato_maschile(): This rule checks if a female proper noun is followed by a male predicate name. 
                             ex. "Alessia è un avvocato formidabile"
+                            
 - art_donna_noun():         This rule checks if the noun "donna" is followed by a male noun. 
                             In this case, the score is decreased of 0.25.  
                             ex. "La donna medico è riuscita nell'intervento"
@@ -107,6 +111,22 @@ def femaleName_maleAppos(tweet, male_crafts, explain):
                         inclusive = - 0.25
                         if explain:
                             explanation = "Utilizzare un nome femminile con un'apposizione maschile diminuisce l'inclusività"
+
+    return inclusive, explanation
+
+
+def nome_predicato_maschile(tweet, male_crafts, explain):
+    inclusive = 0.0
+    explanation = None
+    for idx, (token, tag, det, morph) in enumerate(tweet):
+        if tag == 'PROPN' or tag == 'NOUN' and utils.check_female_name(token):
+            if idx + 3 < len(tweet):
+                if tweet[idx + 1][1] == 'AUX' and tweet[idx + 1][2] == 'cop':
+                    print(tweet[idx + 3][0])
+                    if tweet[idx + 3][0] in male_crafts:
+                        inclusive = - 0.25
+                        if explain:
+                            explanation = "Utilizzare un nome femminile con un nome del predicato maschile diminuisce l'inclusività"
 
     return inclusive, explanation
 
@@ -242,6 +262,7 @@ def male_collettives(tweet, male_list, explain):
     if male_female_detected == True:
         inclusive += 0.25
         if explain:
+            logging.info(male_female_detected, male_female_words_detected)
             explanation = "Utilizzare sia mestiere maschile plurale che il corrispettivo femminile aumenta l'inclusività!"
 
     for idx, (token, tag, det, morph) in enumerate(tweet):
@@ -254,7 +275,7 @@ def male_collettives(tweet, male_list, explain):
                 pl_male_job.append(token)
                 for word in tweet:
                     token_word, tag_word, det_word, morph_word = word
-                    if tag_word == "PROPN":
+                    if tag_word == "PROPN" or tag_word == "NOUN":
 
                         if utils.check_male_name(
                                 token_word):
@@ -278,7 +299,7 @@ def male_expressions(sentence, explain):
     inclusive = 0.0
     explanation = None
     for expression in myExpressions:
-        if "desiderio di paternità" not in sentence:
+        if " di paternità" not in sentence:
             if str(expression).lower() in str(sentence).lower():
                 inclusive = - 0.25
                 if explain:
@@ -357,6 +378,10 @@ def rules(sentences, ph, explain):
         scores.append(score)
         explanations.append(explanation)
 
+        score, explanation = nome_predicato_maschile(phrase, male_crafts, explain)
+        scores.append(score)
+        explanations.append(explanation)
+
         score, explanation = male_expressions(sentence, explain)
         scores.append(score)
         explanations.append(explanation)
@@ -364,12 +389,12 @@ def rules(sentences, ph, explain):
         inclusive = sum(scores)
         explanations = [x for x in explanations if x is not None]
 
-
         new_sentence = sentence.replace("\n", " ")
         new_sentence = new_sentence.replace("\t", " ")
         new_sentence = new_sentence.replace("\r", " ")
-        new_sentence = new_sentence.replace(",", "")
-        #new_sentence = new_sentence.replace(",", "")
+        new_sentence = new_sentence.replace(",", " ")
+        new_sentence = new_sentence.replace(";", " ")
+        # new_sentence = new_sentence.replace("\"", " ")
 
         d.append(
             {
@@ -389,7 +414,6 @@ def rules(sentences, ph, explain):
 
 
 if __name__ == "__main__":
-
 
     nlp = spacy.load("it_core_news_lg")
     crafts_path = '../../script/inclusivity_management/docs/list.tsv'
@@ -440,12 +464,10 @@ if __name__ == "__main__":
         d = rules(sentences, ph, explain)
 
         inclusivity_score, user_label = utils.calculate_user_score('../../results.csv')
-        print("User '"+ str(userid) + "' is classified as: " + str(user_label) + " with a score of: "+ str(inclusivity_score))
-
+        print("User '" + str(userid) + "' is classified as: " + str(user_label) + " with a score of: " + str(
+            inclusivity_score))
 
     if path_csv is not None:
         tweets = pd.read_csv(path_csv)
         sentences, ph = save_postag(tweets)
         d = rules(sentences, ph, explain)
-
-
