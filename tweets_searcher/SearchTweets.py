@@ -440,7 +440,6 @@ class SearchTweets:
                 fut.add_done_callback(self.__save_callback)
                 futures.append(fut)
                 results.append(tweet['text'])
-                print(results)
             for t in results:
                 t_new = t.replace('\n', ' ')
                 t_new = t_new.replace('\t', ' ')

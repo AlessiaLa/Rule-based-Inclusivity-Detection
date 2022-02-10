@@ -122,7 +122,6 @@ def nome_predicato_maschile(tweet, male_crafts, explain):
         if tag == 'PROPN' or tag == 'NOUN' and utils.check_female_name(token):
             if idx + 3 < len(tweet):
                 if tweet[idx + 1][1] == 'AUX' and tweet[idx + 1][2] == 'cop':
-                    print(tweet[idx + 3][0])
                     if tweet[idx + 3][0] in male_crafts:
                         inclusive = - 0.25
                         if explain:
@@ -323,7 +322,6 @@ def save_postag(df):
                     couple_list = j.split('=')
                     phrase_dict[couple_list[0]] = couple_list[1]
             phrase_pos.append((token.text, token.pos_, token.dep_, phrase_dict))
-
         pos_tagging.append(phrase_pos)
     return tweets, pos_tagging
 
